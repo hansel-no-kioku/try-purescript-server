@@ -1,0 +1,11 @@
+/bower_components/
+/node_modules/
+output/
+/generated-docs/
+/.psc-package/
+/.psc*
+/.pulp-cache/
+.pulpunte/
+/.purs*
+/.psa*
+/index.js

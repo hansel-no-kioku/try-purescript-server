@@ -1,0 +1,34 @@
+{
+  "name": "server",
+  "packageSet": {
+    "set": "psc-0.13.4",
+    "repo": "https://github.com/purescript/package-sets.git"
+  },
+  "dependencies": [
+    "aff-promise",
+    "console",
+    "effect",
+    "hyper",
+    "node-fs",
+    "node-path",
+    "prelude",
+    "simple-json"
+  ],
+  "devDependencies": [
+    "psci-support"
+  ],
+  "additions": {
+    "unicode-operators": {
+      "version": "v1.0.0",
+      "repo": "https://github.com/eheitherd/purescript-unicode-operators.git",
+      "dependencies": []
+    },
+    "unicode-prelude": {
+      "version": "v0.2.4",
+      "repo": "https://github.com/vyorkin/purescript-unicode-prelude.git",
+      "dependencies": [
+        "prelude"
+      ]
+    }
+  }
+}

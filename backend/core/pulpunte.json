@@ -1,0 +1,13 @@
+{
+  "name": "core",
+  "packageSet": {
+    "set": "psc-0.13.4",
+    "repo": "https://github.com/purescript/package-sets.git"
+  },
+  "dependencies": [
+    "console",
+    "effect",
+    "prelude"
+  ],
+  "devDependencies": []
+}
