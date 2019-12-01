@@ -53,6 +53,7 @@ compile backend = do
   let args =
         [ "compile"
         , "backend/src/Main.purs"
+        , "backend/" <> backend <> "/lib/*/src/**/*.purs"
         , "backend/" <> backend <> "/.pulpunte/*/*/src/**/*.purs"
         , "--json-errors"
         , "--no-prefix"
