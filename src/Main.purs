@@ -22,7 +22,7 @@ import Hyper.Middleware (Middleware)
 import Hyper.Node.Server (HttpRequest, HttpResponse, defaultOptionsWithLogging, runServer)
 import Hyper.Request (RequestData, getRequestData, readBody)
 import Hyper.Response (ResponseEnded, StatusLineOpen, closeHeaders, respond, writeHeader, writeStatus)
-import Hyper.Status (statusNotFound, statusOK)
+import Hyper.Status (Status, statusNotFound, statusOK)
 import Node.FsExtra (outputFileSync, pathExists, readFileSync, removeSync)
 import Node.Path (concat)
 import Purs (bundle, compile)
@@ -37,8 +37,8 @@ main = runServer defaultOptionsWithLogging {} Ix.do
   body ← readBody
   result ← liftAff $ try $ app request body
   case result of
-    Right response → respondOK cors response
-    Left error → respondNG
+    Right response → respond' statusOK cors response
+    Left error → respond' statusNotFound cors "Not Found"
 
 
 app ∷ RequestData → String → Aff String
@@ -94,20 +94,13 @@ build backend src = do
   pure result
 
 
-respondOK
-  ∷ Boolean
+respond'
+  ∷ Status
+  → Boolean
   → String
   → Middleware Aff (Conn HttpRequest (HttpResponse StatusLineOpen) {}) (Conn HttpRequest (HttpResponse ResponseEnded) {}) Unit
-respondOK cors res = Ix.do
-  writeStatus statusOK
+respond' status cors res = Ix.do
+  writeStatus status
   when cors $ writeHeader $ "Access-Control-Allow-Origin" × "*"
   closeHeaders
   respond res
-
-
-respondNG
-  ∷ Middleware Aff (Conn HttpRequest (HttpResponse StatusLineOpen) {}) (Conn HttpRequest (HttpResponse ResponseEnded) {}) Unit
-respondNG = Ix.do
-  writeStatus statusNotFound
-  closeHeaders
-  respond "Not Found"
