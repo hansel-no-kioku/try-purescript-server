@@ -4,6 +4,8 @@
   "private": true,
   "main": "index.js",
   "scripts": {
+    "build": "pulpunte b -t index.js",
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
