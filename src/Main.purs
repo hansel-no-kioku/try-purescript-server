@@ -23,11 +23,9 @@ import Hyper.Node.Server (HttpRequest, HttpResponse, defaultOptionsWithLogging, 
 import Hyper.Request (RequestData, getRequestData, readBody)
 import Hyper.Response (ResponseEnded, StatusLineOpen, closeHeaders, respond, writeHeader, writeStatus)
 import Hyper.Status (statusNotFound, statusOK)
-import Node.Encoding (Encoding(..))
-import Node.FS.Sync (readTextFile, unlink)
-import Node.FsExtra (outputFileSync, pathExists)
+import Node.FsExtra (outputFileSync, pathExists, readFileSync, removeSync)
 import Node.Path (concat)
-import Purs (compile)
+import Purs (bundle, compile)
 import Simple.JSON (writeJSON)
 
 main :: Effect Unit
@@ -76,12 +74,12 @@ build backend src = do
   compileErrors ← compile backend
   result ← if null compileErrors.errors
     then do
-      js ← readTextFile UTF8 $ concat ["backend", backend, "output", "Main", "index.js"]
-   -- bundle
+      js ← readFileSync $ concat ["backend", backend, "output", "Main", "index.js"]
+      bundled ← bundle backend
       pure $ writeJSON
         { warnings: compileErrors.warnings
-        , js: js
-        , bundled: ""
+        , js
+        , bundled
         }
     else
       pure $ writeJSON
@@ -91,7 +89,8 @@ build backend src = do
           }
         }
 
-  unlink mainPursPath
+  removeSync $ concat ["backend", backend, "output", "Main"]
+  removeSync mainPursPath
   pure result
 
 

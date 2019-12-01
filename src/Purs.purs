@@ -1,8 +1,9 @@
 module Purs
- ( compile
- , CompileErrorPosition
+ ( CompileErrorPosition
  , CompileError
  , CompileErrors
+ , compile
+ , bundle
  ) where
 
 import Prelude
@@ -61,5 +62,15 @@ compile backend = do
   case readJSON result.stderr of
     Right compileErrors → pure compileErrors
     Left errors → throwError $ error $ foldMap renderForeignError errors
+
+bundle ∷ String → Effect String
+bundle backend = do
+  let args =
+        [ "bundle"
+        , "backend/" <> backend <> "/output/*/*.js"
+        , "--module", "Main"
+        , "--main", "Main"
+        ]
+  (_.stdout) <$> runEffectFn1 pursImpl args
 
 foreign import pursImpl ∷ EffectFn1 (Array String) {stdout ∷ String, stderr ∷ String}

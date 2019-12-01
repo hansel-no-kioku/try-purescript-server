@@ -9,7 +9,6 @@
     "console",
     "effect",
     "hyper",
-    "node-fs",
     "node-path",
     "prelude",
     "simple-json"
