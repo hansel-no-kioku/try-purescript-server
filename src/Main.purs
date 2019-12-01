@@ -68,9 +68,7 @@ app request body = do
 
 build ∷ String → String → Effect String
 build backend src = do
-  let mainPursPath = concat ["backend", "src", "Main.purs"]
-
-  outputFileSync mainPursPath src
+  outputFileSync (concat ["backend", "src", "Main.purs"]) src
   compileErrors ← compile backend
   result ← if null compileErrors.errors
     then do
@@ -90,7 +88,7 @@ build backend src = do
         }
 
   removeSync $ concat ["backend", backend, "output", "Main"]
-  removeSync mainPursPath
+  removeSync $ concat ["backend", "src"]
   pure result
 
 
