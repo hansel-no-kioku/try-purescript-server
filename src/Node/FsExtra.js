@@ -4,6 +4,10 @@ exports.pathExistsImpl = function(path) {
   return fs.pathExists(path);
 };
 
+exports.readFileImpl = function(path) {
+  return fs.readFile(path, "utf8");
+};
+
 exports.outputFileSyncImpl = function(path, data) {
   fs.outputFileSync(path, data);
   return {};

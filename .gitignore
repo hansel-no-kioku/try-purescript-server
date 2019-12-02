@@ -9,3 +9,4 @@ output/
 /.purs*
 /.psa*
 /index.js
+/backend/*/bundle.js
