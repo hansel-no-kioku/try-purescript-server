@@ -1,7 +1,7 @@
 {
   "name": "server",
   "packageSet": {
-    "set": "psc-0.13.4",
+    "set": "psc-0.13.5",
     "repo": "https://github.com/purescript/package-sets.git"
   },
   "dependencies": [
