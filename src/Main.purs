@@ -24,17 +24,12 @@ import Hyper.Node.Server (HttpRequest, HttpResponse, defaultOptionsWithLogging, 
 import Hyper.Request (RequestData, getRequestData, readBody)
 import Hyper.Response (ResponseEnded, StatusLineOpen, headers, respond, writeHeader, writeStatus)
 import Hyper.Status (Status, status, statusNotFound, statusOK)
-import Node.FsExtra (outputFileSync, readFile, readFileSync, removeSync)
+import Node.FsExtra (outputFileSync, pathExists, readFile, readFileSync, removeSync)
 import Node.Path (concat)
 import Prelude.Unicode ((∘))
 import Purs as P
 import Simple.JSON (writeJSON)
 
-
-backends ∷ Array String
-backends =
-  [ "core"
-  ]
 
 type ResponseData =
   { status ∷ Status
@@ -62,10 +57,13 @@ main = runServer defaultOptionsWithLogging {} Ix.do
                , headers: []
                , body: "Internal Server Error"
                }
+      on = \f backend → do
+        valid ← validateBackend backend
+        if valid then f backend else pure res404
 
   result ← lift' $ try case parseRequest request of
-    Just (backend × Compile) → compile backend body
-    Just (backend × Bundle) → bundle backend
+    Just (backend × Compile) → compile body `on` backend
+    Just (backend × Bundle) → bundle `on` backend
     _ → pure res404
 
   res ← lift' $ either (const (pure res500) ∘ log ∘ message) pure result
@@ -75,16 +73,18 @@ main = runServer defaultOptionsWithLogging {} Ix.do
 parseRequest ∷ RequestData → Maybe (String × Action)
 parseRequest request
   | ["api", backend, "compile"] ← (force request.parsedUrl).path
-  , Left POST ← request.method
-  , backend `elem` backends = Just $ backend × Compile
+  , Left POST ← request.method = Just $ backend × Compile
   | ["api", backend, "bundle"] ← (force request.parsedUrl).path
-  , Left GET ← request.method
-  , backend `elem` backends = Just $ backend × Bundle
+  , Left GET ← request.method = Just $ backend × Bundle
   | otherwise = Nothing
 
 
+validateBackend ∷ String → Aff Boolean
+validateBackend backend = pathExists $ concat ["backend", backend, "output"]
+
+
 compile ∷ String → String → Aff ResponseData
-compile backend src = liftEffect do
+compile src backend = liftEffect do
   outputFileSync (concat ["backend", "src", "Main.purs"]) src
   compileErrors ← P.compile backend
   result ← if null compileErrors.errors
