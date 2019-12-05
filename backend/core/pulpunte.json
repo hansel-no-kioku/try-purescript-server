@@ -6,12 +6,19 @@
   },
   "dependencies": [
     "aff",
-    "console",
     "effect",
     "prelude",
     "smolder",
     "transformers"
   ],
   "devDependencies": [],
-  "additions": {}
+  "additions": {
+    "unicode-prelude": {
+      "version": "v0.2.4",
+      "repo": "https://github.com/vyorkin/purescript-unicode-prelude.git",
+      "dependencies": [
+        "prelude"
+      ]
+    }
+  }
 }
