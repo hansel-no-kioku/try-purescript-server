@@ -4,6 +4,9 @@
   "private": true,
   "main": "index.js",
   "scripts": {
+    "install": "pulpunte i -c",
+    "postinstall": "npm run setup",
+    "setup": "pulpunte r -m Setup",
     "build": "pulpunte b -t index.js",
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -12,6 +15,7 @@
     "execa": "^3.3.0",
     "fs-extra": "^8.1.0",
     "pulpunte": "^0.2.0",
-    "purescript": "^0.13.5"
+    "purescript": "^0.13.5",
+    "uglify-es": "^3.3.9"
   }
 }

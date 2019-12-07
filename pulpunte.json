@@ -10,6 +10,7 @@
     "effect",
     "hyper",
     "node-path",
+    "options",
     "prelude",
     "simple-json",
     "strings"

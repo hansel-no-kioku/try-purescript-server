@@ -10,4 +10,4 @@ output/
 /.psa*
 /index.js
 /backend/src/
-/backend/*/bundle.js
+/backend/*/*.js

@@ -1,6 +1,7 @@
 module Node.FsExtra
   ( pathExists
   , readFile
+  , remove
   , outputFileSync
   , readFileSync
   , removeSync
@@ -16,11 +17,15 @@ import Effect.Uncurried (EffectFn1, EffectFn2, runEffectFn1, runEffectFn2)
 import Node.Path (FilePath)
 import Prelude.Unicode ((∘))
 
+
 pathExists ∷ FilePath → Aff Boolean
 pathExists = toAff ∘ pathExistsImpl
 
 readFile ∷ FilePath → Aff String
 readFile = toAff ∘ readFileImpl
+
+remove ∷ FilePath → Aff Unit
+remove = toAff ∘ removeImpl
 
 outputFileSync ∷ FilePath → String → Effect Unit
 outputFileSync = runEffectFn2 outputFileSyncImpl
@@ -31,8 +36,10 @@ readFileSync = runEffectFn1 readFileSyncImpl
 removeSync ∷ FilePath → Effect Unit
 removeSync = runEffectFn1 removeSyncImpl
 
+
 foreign import pathExistsImpl ∷ FilePath → Promise Boolean
 foreign import readFileImpl ∷ FilePath → Promise String
+foreign import removeImpl ∷ FilePath → Promise Unit
 foreign import outputFileSyncImpl ∷ EffectFn2 FilePath String Unit
 foreign import readFileSyncImpl ∷ EffectFn1 FilePath String
 foreign import removeSyncImpl ∷ EffectFn1 FilePath Unit
