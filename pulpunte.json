@@ -11,7 +11,8 @@
     "hyper",
     "node-path",
     "prelude",
-    "simple-json"
+    "simple-json",
+    "strings"
   ],
   "devDependencies": [
     "psci-support"

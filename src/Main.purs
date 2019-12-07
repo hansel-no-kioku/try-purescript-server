@@ -5,16 +5,19 @@ module Main
 import Prelude
 
 import Control.Monad.Indexed.Qualified as Ix
-import Data.Array (null)
+import Data.Array as A
 import Data.Either (Either(..), either)
 import Data.HTTP.Method (Method(..))
 import Data.Lazy (force)
 import Data.Maybe (Maybe(..))
 import Data.MediaType.Common (applicationJSON, applicationJavascript)
 import Data.Newtype (unwrap)
+import Data.Nullable (Nullable, null)
+import Data.String.Regex (regex, test)
+import Data.String.Regex.Flags (multiline)
 import Data.Tuple.Unicode (type (×), (×))
 import Effect (Effect)
-import Effect.Aff (Aff, message, try)
+import Effect.Aff (Aff, error, message, throwError, try)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (logShow)
 import Effect.Console (log)
@@ -86,11 +89,35 @@ validateBackend ∷ String → Aff Boolean
 validateBackend backend = pathExists $ concat ["backend", backend, "output"]
 
 
+respond'
+  ∷ Boolean
+  → ResponseData
+  → Middleware Aff (Conn HttpRequest (HttpResponse StatusLineOpen) {}) (Conn HttpRequest (HttpResponse ResponseEnded) {}) Unit
+respond' cors res = Ix.do
+  let contentLength = byteLength res.body UTF8
+  writeStatus res.status
+  when (contentLength > 0) $ writeHeader $ "Content-Length" × show contentLength
+  when cors $ writeHeader $ "Access-Control-Allow-Origin" × "*"
+  headers res.headers
+  respond res.body
+
+
 compile ∷ String → String → Aff ResponseData
 compile src backend = liftEffect do
+  valid ← checkModule src
+  body ← if valid
+    then compile' src backend
+    else pure errInvalidModule
+  pure { status: statusOK
+       , headers: ["Content-Type" × unwrap applicationJSON]
+       , body
+       }
+
+compile' ∷ String → String → Effect String
+compile' src backend = do
   outputFileSync (concat ["backend", "src", "Main.purs"]) src
   compileErrors ← P.compile backend
-  body ← if null compileErrors.errors
+  body ← if A.null compileErrors.errors
     then do
       js ← readFileSync $ concat ["backend", backend, "output", "Main", "index.js"]
       pure $ writeJSON {warnings: compileErrors.warnings, js}
@@ -100,11 +127,7 @@ compile src backend = liftEffect do
   removeSync $ concat ["backend", backend, "output", "Main"]
   removeSync $ concat ["backend", "src"]
 
-  pure { status: statusOK
-       , headers: [ "Content-Type" × unwrap applicationJSON
-                  ]
-       , body
-       }
+  pure body
 
 
 bundle ∷ String → Aff ResponseData
@@ -118,14 +141,36 @@ bundle backend = do
        }
 
 
-respond'
-  ∷ Boolean
-  → ResponseData
-  → Middleware Aff (Conn HttpRequest (HttpResponse StatusLineOpen) {}) (Conn HttpRequest (HttpResponse ResponseEnded) {}) Unit
-respond' cors res = Ix.do
-  let contentLength = byteLength res.body UTF8
-  writeStatus res.status
-  when (contentLength > 0) $ writeHeader $ "Content-Length" × show contentLength
-  when cors $ writeHeader $ "Access-Control-Allow-Origin" × "*"
-  headers res.headers
-  respond res.body
+checkModule ∷ String → Effect Boolean
+checkModule src = do
+  either (const $ throwError $ error "Invalid Regex")
+         (\reg → pure $ test reg src)
+         $ regex "\\s*module\\s+Main[\\s|\\(|$]" multiline
+
+errInvalidModule ∷ String
+errInvalidModule = writeJSON
+  { error:
+    { tag: "CompilerErrors"
+    , contents:
+      [ { "suggestion": null ∷ Nullable String
+        , "position":
+          { "startLine": 1
+          , "startColumn": 1
+          , "endLine": 1
+          , "endColumn": 1
+          }
+        , "moduleName": null ∷ Nullable String
+        , "message": "  The code must start with \"module Main\"\n"
+        , "filename": "backend\\src\\Main.purs"
+        , "errorLink": ""
+        , "errorCode": "ErrorParsingModule"
+        , "allSpans":
+            [ { "start": [1, 1]
+              , "end": [1, 1]
+              , "name": "backend\\src\\Main.purs"
+              }
+            ]
+        }
+      ]
+    }
+  }
