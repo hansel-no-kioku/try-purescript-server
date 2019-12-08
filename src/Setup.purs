@@ -17,6 +17,7 @@ import Node.Path (concat)
 backends ∷ Array String
 backends =
   [ "core"
+  , "phina"
   ]
 
 

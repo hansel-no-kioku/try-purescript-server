@@ -1,0 +1,54 @@
+{
+  "name": "core",
+  "packageSet": {
+    "set": "psc-0.13.5",
+    "repo": "https://github.com/purescript/package-sets.git"
+  },
+  "dependencies": [
+    "aff",
+    "arrays",
+    "bifunctors",
+    "control",
+    "effect",
+    "either",
+    "foldable-traversable",
+    "functions",
+    "maybe",
+    "newtype",
+    "prelude",
+    "profunctor",
+    "strings",
+    "transformers",
+    "tuples"
+  ],
+  "devDependencies": [],
+  "additions": {
+    "phinajs": {
+      "version": "v0.1.9",
+      "repo": "https://github.com/hansel-no-kioku/purescript-phinajs.git",
+      "dependencies": [
+        "aff",
+        "arrays",
+        "effect",
+        "exceptions",
+        "foldable-traversable",
+        "functions",
+        "maybe",
+        "newtype",
+        "nullable",
+        "prelude",
+        "transformers",
+        "tuples",
+        "typelevel-prelude",
+        "unsafe-coerce"
+      ]
+    },
+    "unicode-prelude": {
+      "version": "v0.2.4",
+      "repo": "https://github.com/vyorkin/purescript-unicode-prelude.git",
+      "dependencies": [
+        "prelude"
+      ]
+    }
+  }
+}
